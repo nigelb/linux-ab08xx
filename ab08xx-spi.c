@@ -23,6 +23,46 @@
 #include <linux/spi/spi.h>
 #include <linux/bcd.h>
 
+static int ab08xx_set_reg(struct device *dev, unsigned char address,
+                                unsigned char data)
+{
+        struct spi_device *spi = to_spi_device(dev);
+        unsigned char buf[2];
+
+        /* MSB must be '1' to indicate write */
+        buf[0] = address | 0x80;
+        buf[1] = data;
+
+        return spi_write_then_read(spi, buf, 2, NULL, 0);
+}
+
+static int ab08xx_get_reg(struct device *dev, unsigned char address,
+                                unsigned char *data)
+{
+        struct spi_device *spi = to_spi_device(dev);
+
+        *data = address & 0x7f;
+
+        return spi_write_then_read(spi, data, 1, data, 1);
+}
+
+
+static int ab08xx_read_time(struct device *dev, struct rtc_time *dt)
+{
+}
+
+static int ab08xx_set_time(struct device *dev, struct rtc_time *dt)
+{
+}
+static int ab08xx_probe(struct spi_device *spi)
+{
+	printk(KERN_EMERG "Hello world!\n");		
+}
+
+static int ab08xx_remove(struct spi_device *spi)
+{
+        return 0;
+}
 
 static const struct rtc_class_ops ab08xx_rtc_ops = {
         .read_time      = ab08xx_read_time,
