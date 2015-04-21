@@ -217,7 +217,7 @@ static int ab08xx_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 	buf[3] = (~0x7F & buf[3]) | (0x7F & bin2bcd(dt->tm_min));
 	buf[4] = (~0x3F & buf[4]) | (0x3F & bin2bcd(dt->tm_hour));
 	buf[5] = (~0x3F & buf[5]) | (0x3F & bin2bcd(dt->tm_mday));
-	buf[6] = (~0x0F & buf[6]) | (0x0F & bin2bcd(dt->tm_mon)) + 1;
+	buf[6] = ((~0x0F & buf[6]) | (0x0F & bin2bcd(dt->tm_mon))) + 1;
 	buf[7] =  bin2bcd(dt->tm_year - 100);
 	buf[8] = (~0x07 & buf[8]) | (0x07 & dt->tm_wday);
 	return spi_write_then_read(ab08xx->spi, buf, sizeof(buf), NULL, 0);
