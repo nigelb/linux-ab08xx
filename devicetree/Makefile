@@ -1,4 +1,4 @@
-DTC=/home/pi/dtc/bin/dtc
+DTC=dtc
 
 all: ab0815-spi-rpi-overlay.dtb
 
