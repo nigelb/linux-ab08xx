@@ -26,11 +26,13 @@
 #include "ab08xx-spi.h"
 
 static const struct rtc_class_ops ab08xx_rtc_ops = {
-        .read_time  = ab08xx_read_time,
-        .set_time   = ab08xx_set_time,
-        .read_alarm = ab08xx_get_alarm,
-        .set_alarm  = ab08xx_set_alarm,
-	.proc       = ab08xx_proc,
+        .read_time        = ab08xx_read_time,
+        .set_time         = ab08xx_set_time,
+        .read_alarm       = ab08xx_get_alarm,
+        .set_alarm        = ab08xx_set_alarm,
+	.alarm_irq_enable = ab08xx_alarm_irq_enable,	
+	.proc             = ab08xx_proc,
+//	.ioctl            = ab08xx_rtc_ioctl,
 };
 
 static struct syscore_ops ab08xx_syscore_ops = {
@@ -157,7 +159,7 @@ static int ab08xx_set_time(struct device *dev, struct rtc_time *dt)
 	buf[count] = (~0x7F & buf[count++]) | (0x7F & bin2bcd(dt->tm_min));
 	buf[count] = (~0x3F & buf[count++]) | (0x3F & bin2bcd(dt->tm_hour));
 	buf[count] = (~0x3F & buf[count++]) | (0x3F & bin2bcd(dt->tm_mday));
-	buf[count] = (~0x0F & buf[count++]) | (0x0F & bin2bcd(dt->tm_mon));
+	buf[count] = ((~0x0F & buf[count++]) | (0x0F & bin2bcd(dt->tm_mon))) + 1;
 	buf[count++] =  bin2bcd(dt->tm_year - 100);
 	buf[count] = (~0x07 & buf[count++]) | (0x07 & dt->tm_wday);
 
@@ -206,7 +208,7 @@ static int ab08xx_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 
 	memset(&buf, 0, sizeof buf);
 
-	printk(KERN_EMERG "SET ALARM...\n");
+	printk(KERN_EMERG "SET ALARM %i-%i-%i %i:%i:%i\n", dt->tm_year, dt->tm_mon, dt->tm_mday, dt->tm_hour, dt->tm_min, dt->tm_sec);
 	buf[0] = SPI_READ(ALARM_DATE);
 	status = spi_write_then_read(ab08xx->spi, buf, 1, buf+1, sizeof(buf)-1);
 
@@ -222,6 +224,11 @@ static int ab08xx_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 	buf[8] = (~0x07 & buf[8]) | (0x07 & dt->tm_wday);
 	return spi_write_then_read(ab08xx->spi, buf, sizeof(buf), NULL, 0);
 	
+}
+
+static int ab08xx_alarm_irq_enable(struct device *dev, unsigned int enabled)
+{
+	return -EINVAL;
 }
 
 static int ab08xx_proc(struct device *dev, struct seq_file *seq)
@@ -330,6 +337,10 @@ static int ab08xx_probe(struct spi_device *spi)
        /* register RTC ... from here on, ds1305->ctrl needs locking */
         ab08xx->rtc = devm_rtc_device_register(&spi->dev, clock_name,
                         &ab08xx_rtc_ops, THIS_MODULE);
+
+	//No update interrupt support
+	ab08xx->rtc->uie_unsupported = 1;
+
         if (IS_ERR(ab08xx->rtc)) {
                 status = PTR_ERR(ab08xx->rtc);
                 dev_dbg(&spi->dev, "register rtc --> %d\n", status);

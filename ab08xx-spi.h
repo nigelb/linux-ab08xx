@@ -20,8 +20,6 @@ struct ab08xx_t {
         struct rtc_device       *rtc;
 	u8			id_msb;
 	u8			id_lsb;
-	void (*original_pm_power_off)(void);
-	const struct attribute_group **groups;
 };
 
 
@@ -33,7 +31,11 @@ static int ab08xx_get_alarm(struct device *dev, struct rtc_wkalrm *alm);
 
 static int ab08xx_set_alarm(struct device *dev, struct rtc_wkalrm *alm);
 
+static int ab08xx_alarm_irq_enable(struct device *dev, unsigned int enabled);
+
 static int ab08xx_proc(struct device *dev, struct seq_file *seq);
+
+static int ab08xx_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg);
 
 static void ab08xx_shutdown(void);
 
