@@ -1,0 +1,36 @@
+/dts-v1/;
+/plugin/;
+
+/{
+
+	compatible = "brcm,bcm2708";
+	fragment@0 {
+	        target-path = "/";
+		__overlay__ {
+
+			spi@3 {
+				compatible = "spi-gpio";
+				#address-cells = <0x1>;
+				ranges;
+
+				gpio-miso = <&gpio 5 0>;
+				gpio-mosi = <&gpio 6 0>;
+				gpio-sck = <&gpio 13 0>;
+				num-chipselects = <1>;
+				cs-gpios = <&gpio 12 1>;
+				status = "ok";
+
+				ab0815@0{
+                                	compatible = "ab08xx";
+	                                reg = <0>;      /* CE0 */
+        	                        #address-cells = <1>;
+                	                #size-cells = <0>;
+                        	        spi-max-frequency = <500000>;
+	                        };
+
+			};
+		};
+
+	};
+
+};
