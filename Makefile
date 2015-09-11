@@ -3,11 +3,12 @@ obj-m += ab08xx-spi.o
 CURRENT = $(shell uname -r)
 DEST = /lib/modules/$(CURRENT)/kernel/drivers/rtc/
 # ccflags-y+=" -save-temps "
+#EXTRA_C_FLAGS="-save-temps"
 
 SUBDIRS = devicetree
 
 all: $(SUBDIRS) ab08xx-spi-sysfs.c
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules EXTRA_CFLAGS="-save-temps"
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules EXTRA_CFLAGS="${EXTRA_C_FLAGS}"
 
 .PHONY: subdirs $(SUBDIRS)
 
