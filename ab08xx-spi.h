@@ -39,6 +39,6 @@ static int ab08xx_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long 
 
 static void ab08xx_shutdown(void);
 
-static struct ab08xx_t power_gizmo;
+static struct ab08xx_t ab08xx_clock;
 
 #endif
